@@ -57,6 +57,7 @@ class User extends Authenticatable
         return $this->getAttribute('role') === 'user';
     }
 
+
     public function tickets(): HasMany{
         return $this->hasMany(Ticket::class);
     }

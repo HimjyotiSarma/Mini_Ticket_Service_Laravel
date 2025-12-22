@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
+    public const STATUS_OPEN = 'open';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_CLOSED = 'closed';
     protected $fillable = ['title', 'description', 'status', 'user_id'];
 
     protected $casts = [
@@ -15,22 +18,22 @@ class Ticket extends Model
     ];
 
     public function isOpen(): bool{
-        return $this->getAttribute('status') === 'open';
+        return $this->getAttribute('status') === self::STATUS_OPEN;
     }
 
     public function isInProgress(): bool{
-        return $this->getAttribute('status') === 'in_progress';
+        return $this->getAttribute('status') === self::STATUS_IN_PROGRESS;
     }
 
     public function isClosed(): bool{
-        return $this->getAttribute('status') === 'closed';
+        return $this->getAttribute('status') === self::STATUS_CLOSED;
     }
 
     public function close(){
         if($this->isClosed()){
             return;
         }
-        $this->setAttribute('status', 'closed');
+        $this->setAttribute('status', self::STATUS_CLOSED);
         $this->setAttribute('closed_at', now());
         $this->save();
     }
