@@ -35,8 +35,11 @@ class TicketPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Ticket $ticket): bool
+    public function update(User $user, Ticket $ticket): bool | Response
     {
+        if($ticket->isClosed()){
+            return Response::deny('Cannot update a closed ticket.');
+        }
         return $user->isAdmin() || $user->id === $ticket->user_id;
     }
 
