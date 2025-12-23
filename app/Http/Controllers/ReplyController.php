@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reply;
+use App\Models\Ticket;
+use Gate;
 use Illuminate\Http\Request;
 
 class ReplyController extends Controller
@@ -10,9 +12,12 @@ class ReplyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Ticket $ticket)
     {
-        //
+        $this->authorize('view', $ticket);
+
+        $replies = $ticket->replies()->with('user:id,name,role')->latest()->get();
+        return response()->json($replies);
     }
 
     /**
@@ -26,10 +31,22 @@ class ReplyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Ticket $ticket)
     {
-        //
+        Gate::authorize('store', $ticket);
+
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $reply = $ticket->replies()->create([
+            'message' => $request->message,
+            'user_id' => $request->user()->id,
+        ]);
+
+        return response()->json($reply->load('user:id,name,role'), 201);
     }
+    
 
     /**
      * Display the specified resource.

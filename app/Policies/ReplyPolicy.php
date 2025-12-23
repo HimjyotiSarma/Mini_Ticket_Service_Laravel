@@ -17,10 +17,12 @@ class ReplyPolicy
         return $user->isAdmin();
     }
 
+    
+
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Reply $reply): bool
+    public function create(User $user, Reply $reply): bool
     {
         return $user->isAdmin() || $user->id === $reply->ticket->user_id;
     }
@@ -28,7 +30,7 @@ class ReplyPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user, Ticket $ticket): bool
+    public function store(User $user, Ticket $ticket): bool
     {
         return $user->isAdmin() || $user->id === $ticket->user_id;
     }
