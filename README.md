@@ -1,59 +1,152 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Mini Ticketing System (API-Based)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This project is a RESTful **API-only** mini ticketing system built with **Laravel**.  
+It supports user authentication, ticket management, and replies with proper role-based authorization.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The application uses **Laravel Sanctum (personal access tokens)** for authentication and is designed to return **JSON responses only**, making it suitable for API clients such as Postman or frontend SPAs.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+### Authentication
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+-   User registration
+-   User login (token-based authentication)
+-   User logout (token revocation)
+-   Authenticated user profile endpoint
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Ticket Management
 
-## Laravel Sponsors
+-   Users can create support tickets
+-   Users can view, update, and close their own tickets
+-   Admin users can view all tickets
+-   Ticket status lifecycle:
+    -   `open`
+    -   `in_progress`
+    -   `closed`
+-   Closed tickets cannot be modified (must use the close endpoint)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Replies
 
-### Premium Partners
+-   Replies are nested under tickets
+-   Users and admins can reply to tickets they are authorized to view
+-   Replies are not allowed on closed tickets
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Authorization
 
-## Contributing
+-   Authorization is implemented using **Laravel Policies**
+-   `TicketPolicy` enforces:
+    -   Ownership rules
+    -   Admin access
+-   Reply access is controlled through the associated ticket
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## API Endpoints
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Authentication Routes
 
-## Security Vulnerabilities
+```
+POST /api/register
+POST /api/login
+POST /api/logout
+GET /api/user
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
 
-## License
+### Ticket Routes
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+POST /api/tickets
+GET /api/tickets (admin only)
+GET /api/tickets/{ticket}
+PUT /api/tickets/{ticket}
+POST /api/tickets/{ticket}/close
+```
+
+### Reply Routes
+
+```
+GET /api/tickets/{ticket}/replies
+POST /api/tickets/{ticket}/replies
+
+```
+
+---
+
+## Authentication & Headers
+
+All protected routes require a valid Sanctum token.
+
+### Required Headers
+
+```
+Authorization: Bearer {access_token}
+Accept: application/json
+Content-Type: application/json
+```
+
+---
+
+## Error Handling
+
+-   All API responses are returned in **JSON format**
+-   Authentication failures return **401 Unauthorized**
+-   Validation errors return **422 Unprocessable Entity**
+-   Missing resources return **404 Resource Not Found**
+
+Custom middleware and exception handling ensure API requests never redirect to HTML pages.
+
+---
+
+## Database Schema
+
+### Users
+
+-   `id`
+-   `name`
+-   `email`
+-   `password`
+-   `role` (`user`, `admin`)
+-   timestamps
+
+### Tickets
+
+-   `id`
+-   `user_id`
+-   `title`
+-   `description`
+-   `status`
+-   `closed_at`
+-   timestamps
+
+### Replies
+
+-   `id`
+-   `ticket_id`
+-   `user_id`
+-   `message`
+-   timestamps
+
+---
+
+## Tech Stack
+
+-   Laravel
+-   Laravel Sanctum
+-   SQLite (development database)
+-   RESTful JSON API
+
+---
+
+## Notes
+
+-   This project is intentionally **API-only** (no UI)
+-   Business logic is kept in models, controllers, and policies
+-   Authorization logic is centralized using Laravel Policies
+-   Designed to be clean, minimal, and interview-ready
+
+---

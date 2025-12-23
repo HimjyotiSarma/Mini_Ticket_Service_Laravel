@@ -29,9 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
         $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
-            if ($request->is('api/tickets/*') || $request->wantsJson()) {
+            if ($request->is('api/*') || $request->wantsJson()) {
                 return response()->json([
-                    'message' => 'Ticket not found.',
+                    'message' => 'Resource not found.',
                 ], 404);
             }
         });
