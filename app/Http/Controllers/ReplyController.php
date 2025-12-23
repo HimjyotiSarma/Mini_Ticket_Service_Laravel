@@ -17,6 +17,9 @@ class ReplyController extends Controller
         $this->authorize('view', $ticket);
 
         $replies = $ticket->replies()->with('user:id,name,role')->latest()->get();
+        if($replies->isEmpty()) {
+            return response()->json(['message' => 'No replies found for this ticket.'], 404);
+        };
         return response()->json($replies);
     }
 

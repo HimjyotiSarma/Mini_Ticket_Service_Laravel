@@ -1,8 +1,12 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,10 +16,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->api([
+        $middleware->api(prepend:[
             App\Http\Middleware\ForceJsonResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (AuthenticationException $exception, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'message' => method_exists($exception, 'getMessage') ? $exception->getMessage() : 'Unauthenticated.',
+                ], method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : 401);
+            }
+        });
+        $exceptions->render(function (NotFoundHttpException $exception, Request $request) {
+            if ($request->is('api/tickets/*') || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Ticket not found.',
+                ], 404);
+            }
+        });
     })->create();

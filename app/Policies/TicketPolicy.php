@@ -19,9 +19,12 @@ class TicketPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Ticket $ticket): bool
+    public function view(User $user, Ticket $ticket): Response
     {
-        return $user->isAdmin() || $user->id === $ticket->user_id;
+        if($user->isAdmin() || $user->id === $ticket->user_id){
+            return Response::allow();
+        };
+        return Response::deny('You do not have permission to view this ticket.');
     }
 
     /**

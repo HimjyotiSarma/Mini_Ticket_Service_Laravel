@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets/{ticket}/close', [TicketController::class, 'close']);
 });
 
-
+// Reply Routes
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets/{ticket}/replies', [ReplyController::class, 'store']);
