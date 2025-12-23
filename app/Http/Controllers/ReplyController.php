@@ -33,7 +33,7 @@ class ReplyController extends Controller
      */
     public function store(Request $request, Ticket $ticket)
     {
-        Gate::authorize('store', $ticket);
+        $this->authorize('view', $ticket);
 
         $request->validate([
             'message' => 'required|string',

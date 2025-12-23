@@ -13,7 +13,7 @@ class TicketController extends Controller
      */
     public function index()
     {
-        Gate::authorize('viewAny', Ticket::class);
+        $this->authorize('viewAny', Ticket::class);
 
         $tickets = Ticket::with('user')->latest()->get();
         return response()->json($tickets);
@@ -50,7 +50,7 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        Gate::authorize('view', $ticket);
+        $this->authorize('view', $ticket);
 
         return response()->json($ticket->load('user', 'replies'));
     }
@@ -68,7 +68,7 @@ class TicketController extends Controller
      */
     public function update(Request $request, Ticket $ticket)
     {
-        Gate::authorize('update', $ticket);
+        $this->authorize('update', $ticket);
 
         $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -77,7 +77,7 @@ class TicketController extends Controller
         ]);
 
         if($request->has('status') && $request->status === Ticket::STATUS_CLOSED){
-            return response()->json(['message' => 'Use the close endpoint to close a ticket.'], 400);
+            return response()->json(['message' => 'Use the close endpoint to close a ticket.'], 422);
         }
 
         if ($request->has('title')) {
